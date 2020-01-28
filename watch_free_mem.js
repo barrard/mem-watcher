@@ -22,7 +22,7 @@ function check_free_mem(){
 //console.log("{print $2}")
   //console.log(stdout)// the one we want is [1]
     var total = stdout.split('\n')[1]
-//    console.log({total})
+   console.log({total})
 
     execute("free  | awk '{print $4}' ", (stdout)=>{
       /* get used and or free mem */
@@ -34,7 +34,7 @@ function check_free_mem(){
       console.log({CUTOFF})
       console.log(`available < CUTOFF ? ${available < CUTOFF}`)
       var usage = available/total
-//      console.log({usage})
+     console.log({usage})
       if(available < CUTOFF){
 
 
