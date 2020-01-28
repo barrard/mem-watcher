@@ -5,10 +5,16 @@ init()
 
 
 function init(){
-  setTimeout(()=>{
+  let CPU_MAX = get_cpu_MAX((cpu_max)=>{
+    console.log({cpu_max})
 
-    get_cpu_frequency()
-  }, 2000)
+
+    setInterval(()=>{
+      console.log('run?')
+
+      get_cpu_frequency()
+    }, 2000)
+  })
 }
  function get_command(command, res){
 	// console.log('The command is '+command)
@@ -92,21 +98,18 @@ function run_multiple_command_and_return_output(command_string, cb){
 }
 
 
-function run_basic_command_and_return_output(command_string, res){
+function run_basic_command_and_return_output(command_string, cb){
 	var command = command_string
 	var resp = {}
 	cmd.get(command, function(err, data, stderr){
 		if(err){
-			// console.log('err')
-			// console.log(err)
-			resp.err=err
-			res.send(resp)
+			console.log('err')
+			console.log(err)
+
 		}else if(data){
 			// console.log('ip data')
-			// console.log(data)
 			data = split_lines_of_data(data)
-			resp.data=data
-			res.send(resp)
+      cb(data)
 
 		}
 	})
@@ -116,7 +119,9 @@ function split_lines_of_data(data){
 	return data.split('\n')
 }
 function get_cpu_data(res){
-	run_basic_command_and_return_output('lscpu', res)
+	run_basic_command_and_return_output('lscpu', (data)=>{
+    console.log({data})
+  })
 
 }
 function get_mem_data(res){
@@ -138,7 +143,18 @@ function get_mem_data(res){
 
 }
 function get_cpu_frequency(res){
-	run_basic_command_and_return_output("cat /proc/cpuinfo | grep 'processor\\|cpu MHz'", res)
+  var data = run_basic_command_and_return_output("cat /proc/cpuinfo | grep 'processor\\|cpu MHz'", (data)=>{
+    /* get even lines (cpu usage) */
+    data = data.filter((d, i)=> i%2 !== 0)
+    data = data.map(d=>d.split(': ')[1])
+    console.log(data)
+  })
+
+}
+function get_cpu_MAX(cb){
+	run_basic_command_and_return_output("lscpu | grep 'CPU max MHz:'", (data)=>{
+    cb(data)
+  })
 }
 
 module.exports = {
