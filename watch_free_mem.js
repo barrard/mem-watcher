@@ -21,7 +21,7 @@ function check_free_mem(){
     /* get total mem */
 //console.log("{print $2}")
   //console.log(stdout)// the one we want is [1]
-    var total = stdout.split('\n')[1]
+    var total = parseInt(stdout.split('\n')[1])
    console.log({total})
 
     execute("free  | awk '{print $4}' ", (stdout)=>{
@@ -29,13 +29,19 @@ function check_free_mem(){
 //console.log("{print $4}")
 
     //  console.log(stdout)
-      var available = parseInt(stdout.split('\n')[1])
-      console.log({available})
+      var free = parseInt(stdout.split('\n')[1])
+      console.log({free})
       console.log({CUTOFF})
-      console.log(`available < CUTOFF ? ${available < CUTOFF}`)
-      var usage = available/total
+      console.log(`free < CUTOFF ? ${free < CUTOFF}`)
+      var usage = free/total
      console.log({usage})
-      if(available < CUTOFF){
+
+     execute("free  | awk '{print $7}' ", (stdout)=>{
+      var available = parseInt(stdout.split('\n')[1])
+
+      console.log({available})
+
+      if(free < CUTOFF){
 
 
         // execute('pm2 restart all', (stdout)=>console.log(stdout))
@@ -43,6 +49,7 @@ function check_free_mem(){
 //       execute('service apache2 restart', ()=>{console.log('bye?')})
         }
 
+      })
     })
   })
 }
