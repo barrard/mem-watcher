@@ -2,7 +2,7 @@ var exec = require('child_process').exec;
 function execute(command, callback){
   exec(command, function(error, stdout, stderr){ callback(stdout); });
 };
-const CUTOFF = 150000 //80% used memory
+const CUTOFF = 60100 //80% used memory
 
 /* Start the memoery check timer */
 init()
