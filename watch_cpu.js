@@ -5,16 +5,35 @@ init()
 
 
 function init(){
-  let CPU_MAX = get_cpu_MAX((cpu_max)=>{
-    console.log({cpu_max})
 
 
     setInterval(()=>{
-      console.log('run?')
 
-      get_cpu_frequency()
+      get_cpu_frequency(cpu_data =>{
+        console.log({cpu_data})
+        if( isAboveLimit(cpu_data) ){
+          setOneMinCheckCPU(cpu_data)
+        }
+      })
     }, 2000)
+
+}
+const CPU_LIMIT = 1
+function isAboveLimit(cpu){
+  return cpu > CPU_LIMIT
+}
+let setOneMinCheckCPUFlag = false
+function setOneMinCheckCPU(current_value){
+  if(setOneMinCheckCPUFlag) return
+  setOneMinCheckCPUFlag = true
+  get_cpu_frequency(cpu_data => {
+    if( isAboveLimit(cpu_data) ) {
+      /* Restart PM2 */
+      run_basic_command_and_return_output('pm2 restart all',stdOut => console.log((stdOut)))
+    }
   })
+
+
 }
  function get_command(command, res){
 	// console.log('The command is '+command)
@@ -108,7 +127,7 @@ function run_basic_command_and_return_output(command_string, cb){
 
 		}else if(data){
 			// console.log('ip data')
-			data = split_lines_of_data(data)
+			// data = split_lines_of_data(data)
       cb(data)
 
 		}
@@ -142,13 +161,19 @@ function get_mem_data(res){
 	})
 
 }
-function get_cpu_frequency(res){
-  var data = run_basic_command_and_return_output("cat /proc/cpuinfo | grep 'processor\\|cpu MHz'", (data)=>{
-    /* get even lines (cpu usage) */
-    data = data.filter((d, i)=> i%2 !== 0)
-    data = data.map(d=>d.split(': ')[1])
+function get_cpu_frequency(cb){
+  run_basic_command_and_return_output("uptime", (data)=>{
+    data = data.split('average:')[1]
+    data = parseFloat(data.split(',')[0])
     console.log(data)
+    cb(data)
   })
+  // var data = run_basic_command_and_return_output("cat /proc/cpuinfo | grep 'processor\\|cpu MHz'", (data)=>{
+  //   /* get even lines (cpu usage) */
+  //   data = data.filter((d, i)=> i%2 !== 0)
+  //   data = data.map(d=>d.split(': ')[1])
+  //   console.log(data)
+  // })
 
 }
 function get_cpu_MAX(cb){
